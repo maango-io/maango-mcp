@@ -1,4 +1,13 @@
-"""Thin async HTTP client for the Maango API."""
+"""Thin async HTTP client for the Maango API.
+
+Deployed mode: the MCP server holds ONE service API key (MAANGO_API_KEY) and
+calls the Maango REST API on behalf of every connected MCP client. End-users
+connecting to mcp.maango.io do not need their own key.
+
+Local mode: developers running the server via stdio for Claude Desktop supply
+their own MAANGO_API_KEY in .env. Anonymous (no key) is also accepted — the
+server will still start and rely on the API's public surface area.
+"""
 
 import os
 
@@ -7,19 +16,17 @@ import httpx
 
 class MaangoClient:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.base_url = os.environ.get(
             "MAANGO_API_BASE_URL", "https://api.maango.io"
         ).rstrip("/")
-        api_key = os.environ.get("MAANGO_API_KEY", "")
-        if not api_key:
-            raise ValueError("MAANGO_API_KEY environment variable is required")
+        api_key = os.environ.get("MAANGO_API_KEY", "").strip()
+        headers: dict[str, str] = {"User-Agent": "maango-mcp/0.1.0"}
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "User-Agent": "maango-mcp/0.1.0",
-            },
+            headers=headers,
             timeout=15.0,
             follow_redirects=True,
         )
