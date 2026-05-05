@@ -24,14 +24,14 @@ SSH into the server, then:
 
 ```bash
 export MAANGO_API_KEY=maango_sk_xxxxxxxx
-curl -fsSL https://raw.githubusercontent.com/21nkant/maango-mcp/main/deploy/deploy.sh | sudo -E bash
+curl -fsSL https://raw.githubusercontent.com/maango-io/maango-mcp/main/deploy/deploy.sh | sudo -E bash
 ```
 
 Or the safer path — clone first, inspect, run:
 
 ```bash
 cd /srv
-sudo git clone https://github.com/21nkant/maango-mcp.git
+sudo git clone https://github.com/maango-io/maango-mcp.git
 cd maango-mcp/deploy
 sudo MAANGO_API_KEY=maango_sk_xxxxxxxx ./deploy.sh
 ```
@@ -114,7 +114,7 @@ Restart Claude Desktop. Ask Claude *"Check if I can scrape nytimes.com for train
 | `CONTAINER_NAME` | `maango-mcp` | Docker container name |
 | `IMAGE_TAG` | `maango-mcp:latest` | Docker image tag |
 | `INSTALL_DIR` | `/srv/maango-mcp` | Where the repo is cloned |
-| `REPO_URL` | `https://github.com/21nkant/maango-mcp.git` | Source repo |
+| `REPO_URL` | `https://github.com/maango-io/maango-mcp.git` | Source repo |
 | `MAANGO_API_BASE_URL` | `https://api.maango.io` | Upstream REST API |
 | `ENV_FILE` | `/etc/maango-mcp.env` | Path the script writes the container's secrets to (mode `0600`) |
 | `RL_REQS_PER_SEC` | `10` | Per-IP sustained request rate (`limit_req`) |

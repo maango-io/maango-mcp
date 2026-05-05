@@ -34,7 +34,7 @@ been caught in a spam filter.
 
 In scope:
 
-- This repository (`7mehul/maango-mcp`) — the MCP server, its Docker image,
+- This repository (`maango-io/maango-mcp`) — the MCP server, its Docker image,
   and the deploy script.
 - Configuration that ships in this repo (Dockerfile, deploy/deploy.sh,
   nginx config templates).

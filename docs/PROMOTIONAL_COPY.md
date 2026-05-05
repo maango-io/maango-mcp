@@ -23,7 +23,7 @@ in this file so future versions stay aligned.
 >
 > Site owners increasingly publish machine-readable opt-outs across **8 different standards** — `robots.txt`, `ai.txt`, `llms.txt`, TDM-Rep, meta tags, ai-bots HTTP header, ToS clauses, and X-Robots-Tag. Maango aggregates all of them across 1M+ domains and normalises them into one canonical answer. Your agent stops shipping its own parser per standard.
 >
-> Three transports (`stdio`, `sse`, `streamable-http`), seven tools (`check_permission`, `lookup_domain`, `lookup_domain_full`, `lookup_domain_conflicts`, `search_domains`, `batch_check`, `get_changelog`), one hosted endpoint at `https://mcp.maango.io/sse`. MIT-licensed, Docker image at `ghcr.io/7mehul/maango-mcp`, `pip install maango-mcp`.
+> Three transports (`stdio`, `sse`, `streamable-http`), seven tools (`check_permission`, `lookup_domain`, `lookup_domain_full`, `lookup_domain_conflicts`, `search_domains`, `batch_check`, `get_changelog`), one hosted endpoint at `https://mcp.maango.io/sse`. MIT-licensed, Docker image at `ghcr.io/maango-io/maango-mcp`, `pip install maango-mcp`.
 
 ---
 
@@ -32,13 +32,13 @@ in this file so future versions stay aligned.
 For [punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) — likely category: **🌐 Browser Automation** or **📑 Compliance / Policy** (open a PR adding the line under the most fitting one):
 
 ```markdown
-- [7mehul/maango-mcp](https://github.com/7mehul/maango-mcp) 🐍 - Permissions layer for AI agents. Pre-flight `check_permission(domain, action)` aggregating robots.txt, ai.txt, llms.txt, TDM-Rep, and ToS into one canonical "is this allowed?" answer across 1M+ domains.
+- [maango-io/maango-mcp](https://github.com/maango-io/maango-mcp) 🐍 - Permissions layer for AI agents. Pre-flight `check_permission(domain, action)` aggregating robots.txt, ai.txt, llms.txt, TDM-Rep, and ToS into one canonical "is this allowed?" answer across 1M+ domains.
 ```
 
 For [appcypher/awesome-mcp-servers](https://github.com/appcypher/awesome-mcp-servers) (alternative list, table format):
 
 ```markdown
-| [7mehul/maango-mcp](https://github.com/7mehul/maango-mcp) | AI policy gate for agent web access — one call, eight standards, a million domains. | Python | MIT |
+| [maango-io/maango-mcp](https://github.com/maango-io/maango-mcp) | AI policy gate for agent web access — one call, eight standards, a million domains. | Python | MIT |
 ```
 
 ---
@@ -54,9 +54,9 @@ for a manifest:
 - **Tags:** `permissions`, `compliance`, `web-scraping`, `ai-policy`, `robots-txt`, `ai-txt`, `llms-txt`, `tdm-rep`, `legal`, `governance`
 - **License:** MIT
 - **Homepage:** https://maango.io
-- **Repository:** https://github.com/7mehul/maango-mcp
+- **Repository:** https://github.com/maango-io/maango-mcp
 - **Hosted endpoint:** https://mcp.maango.io/sse
-- **Install command (local):** `pip install maango-mcp` or `docker pull ghcr.io/7mehul/maango-mcp:latest`
+- **Install command (local):** `pip install maango-mcp` or `docker pull ghcr.io/maango-io/maango-mcp:latest`
 
 ---
 
@@ -87,19 +87,19 @@ Show HN: Maango MCP – Pre-flight AI permissions check across 1M+ domains
 >
 > The motivation: every site is opting out in different formats. NYT v OpenAI is teaching the industry that "I scraped what robots.txt allowed" is not a defense if the site also published an ai.txt blocking AI use specifically. Building that compliance layer per agent is weeks of work; it should be a single MCP call.
 >
-> Repo, docs, and decision tree: https://github.com/7mehul/maango-mcp
+> Repo, docs, and decision tree: https://github.com/maango-io/maango-mcp
 
 ---
 
 ## Twitter / X launch thread
 
-**1/** Maango MCP is live. One MCP tool call to check whether your AI agent is allowed to scrape, summarise, or train on any URL. https://github.com/7mehul/maango-mcp
+**1/** Maango MCP is live. One MCP tool call to check whether your AI agent is allowed to scrape, summarise, or train on any URL. https://github.com/maango-io/maango-mcp
 
 **2/** Site owners now publish opt-outs in 8 different formats — robots.txt, ai.txt, llms.txt, TDM-Rep, ai-bots header, X-Robots-Tag, ToS clauses, meta tags. Aggregating them per agent is weeks of work.
 
 **3/** `check_permission(domain, action)` gives you one canonical answer aggregated across all 8 standards on 1M+ domains. Plus reason codes (`compliant`, `bot_blocked`, `stance_blocks_all`, …) so your agent can tell the user *why* it didn't fetch.
 
-**4/** Hosted free at `mcp.maango.io/sse`. Self-host via `docker pull ghcr.io/7mehul/maango-mcp:latest` or `pip install maango-mcp`. MIT, 87 tests, Prometheus metrics. PRs welcome.
+**4/** Hosted free at `mcp.maango.io/sse`. Self-host via `docker pull ghcr.io/maango-io/maango-mcp:latest` or `pip install maango-mcp`. MIT, 87 tests, Prometheus metrics. PRs welcome.
 
 ---
 
@@ -113,7 +113,7 @@ Show HN: Maango MCP – Pre-flight AI permissions check across 1M+ domains
 >
 > Hosted free at mcp.maango.io. MIT-licensed. Docker image, PyPI, GHCR. Built on the spec at modelcontextprotocol.io so it works with Claude Desktop, Cursor, Cline, Zed, and any other MCP client out of the box.
 >
-> Code: https://github.com/7mehul/maango-mcp
+> Code: https://github.com/maango-io/maango-mcp
 > Docs: https://maango.io/docs
 
 ---

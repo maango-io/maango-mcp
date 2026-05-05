@@ -10,10 +10,10 @@
 #   export MAANGO_API_KEY=maango_sk_xxxxxxxx
 #   export MCP_DOMAIN=mcp.maango.io              # optional, defaults to this
 #   export MCP_HOST_PORT=8000                    # optional, defaults to this
-#   curl -fsSL https://raw.githubusercontent.com/21nkant/maango-mcp/main/deploy/deploy.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/maango-io/maango-mcp/main/deploy/deploy.sh | bash
 #
 # Or clone first, review, then run:
-#   cd /srv && git clone https://github.com/21nkant/maango-mcp.git
+#   cd /srv && git clone https://github.com/maango-io/maango-mcp.git
 #   cd maango-mcp/deploy && MAANGO_API_KEY=... ./deploy.sh
 #
 # The script is idempotent — safe to re-run for updates.
@@ -22,7 +22,7 @@ set -euo pipefail
 
 # ----- Config ----------------------------------------------------------------
 
-REPO_URL="${REPO_URL:-https://github.com/21nkant/maango-mcp.git}"
+REPO_URL="${REPO_URL:-https://github.com/maango-io/maango-mcp.git}"
 INSTALL_DIR="${INSTALL_DIR:-/srv/maango-mcp}"
 MCP_DOMAIN="${MCP_DOMAIN:-mcp.maango.io}"
 MCP_HOST_PORT="${MCP_HOST_PORT:-8000}"

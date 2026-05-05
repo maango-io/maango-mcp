@@ -7,7 +7,7 @@ for tests and documentation.
 ## Quick start
 
 ```bash
-git clone https://github.com/7mehul/maango-mcp.git
+git clone https://github.com/maango-io/maango-mcp.git
 cd maango-mcp
 
 # uv handles python version + venv + install in one step.
@@ -89,7 +89,7 @@ Pushing the tag triggers two workflows in parallel:
 
 - [.github/workflows/release.yml](./.github/workflows/release.yml) — runs
   pytest, builds the multi-stage Docker image, pushes
-  `ghcr.io/7mehul/maango-mcp:<tag>` and `:latest`, creates a GitHub Release.
+  `ghcr.io/maango-io/maango-mcp:<tag>` and `:latest`, creates a GitHub Release.
 - [.github/workflows/publish-pypi.yml](./.github/workflows/publish-pypi.yml)
   — builds sdist + wheel, publishes to PyPI via Trusted Publisher (OIDC,
   no API token). One-time PyPI setup is documented at the top of that file.

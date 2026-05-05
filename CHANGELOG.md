@@ -36,7 +36,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 ## [0.1.0] — 2026-04-24
 
 Initial published version. Source repo migrated from a private collaborator
-fork to `7mehul/maango-mcp`.
+fork to `maango-io/maango-mcp` (via interim transit through `7mehul/maango-mcp`).
 
 ### Added
 
@@ -59,5 +59,5 @@ fork to `7mehul/maango-mcp`.
   buildx smoke test.
 - `uv.lock` committed for reproducible builds.
 
-[Unreleased]: https://github.com/7mehul/maango-mcp/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/7mehul/maango-mcp/releases/tag/v0.1.0
+[Unreleased]: https://github.com/maango-io/maango-mcp/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/maango-io/maango-mcp/releases/tag/v0.1.0

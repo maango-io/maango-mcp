@@ -6,7 +6,7 @@ name: Publish to PyPI
 #   1. Create / log in at https://pypi.org/manage/account/publishing/
 #   2. Add a "pending" trusted publisher with these exact values:
 #        PyPI Project Name:    maango-mcp
-#        Owner:                7mehul
+#        Owner:                maango-io
 #        Repository name:      maango-mcp
 #        Workflow name:        publish-pypi.yml
 #        Environment name:     pypi

@@ -1,9 +1,9 @@
 # Maango MCP Server
 
-[![CI](https://github.com/7mehul/maango-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/7mehul/maango-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/maango-io/maango-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/maango-io/maango-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Docker (GHCR)](https://img.shields.io/badge/docker-ghcr.io%2F7mehul%2Fmaango--mcp-2496ed)](https://github.com/7mehul/maango-mcp/pkgs/container/maango-mcp)
+[![Docker (GHCR)](https://img.shields.io/badge/docker-ghcr.io%2Fmaango--io%2Fmaango--mcp-2496ed)](https://github.com/maango-io/maango-mcp/pkgs/container/maango-mcp)
 
 > **The permissions layer for AI agents on the web.** Before your agent scrapes, summarises, trains on, or otherwise uses content from a website, ask Maango what's allowed. One call, canonical answer.
 
@@ -17,7 +17,7 @@ Maango aggregates **1,000,000+ domains × 8 AI-policy standards** into one canon
 - **Protocol:** [Model Context Protocol](https://modelcontextprotocol.io)
 - **Registry coverage:** 1,000,000+ domains, 8 AI-policy standards aggregated
 - **Transports:** `stdio` (local), `sse` + `streamable-http` (remote)
-- **Image:** [`ghcr.io/7mehul/maango-mcp`](https://github.com/7mehul/maango-mcp/pkgs/container/maango-mcp)
+- **Image:** [`ghcr.io/maango-io/maango-mcp`](https://github.com/maango-io/maango-mcp/pkgs/container/maango-mcp)
 - **Package:** [`pip install maango-mcp`](https://pypi.org/project/maango-mcp/)
 
 ## Tools exposed
@@ -79,7 +79,7 @@ Point them at `https://mcp.maango.io/sse`. No auth required for the hosted endpo
 ### Local development (stdio)
 
 ```bash
-git clone https://github.com/21nkant/maango-mcp.git
+git clone https://github.com/maango-io/maango-mcp.git
 cd maango-mcp
 uv venv && source .venv/bin/activate
 uv pip install -e .
@@ -180,7 +180,7 @@ Security disclosures: see [SECURITY.md](./SECURITY.md).
 - Main site: https://maango.io
 - API docs: https://maango.io/docs
 - Spec: https://github.com/maango-io/agent-permissions
-- Issues: https://github.com/7mehul/maango-mcp/issues
+- Issues: https://github.com/maango-io/maango-mcp/issues
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ## License
