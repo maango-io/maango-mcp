@@ -17,10 +17,15 @@ name: Publish to PyPI
 # After the first successful publish, PyPI converts the pending publisher
 # into a permanent one tied to the now-existing project.
 
+# NOTE: tag-driven trigger is intentionally disabled until the one-time PyPI
+# Trusted Publisher setup above is complete. Until then, tags only fire
+# release.yml (Docker + GH Release). To enable PyPI publishing, flip this
+# back to:
+#   on:
+#     push:
+#       tags: ["v*"]
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 jobs:
   build:

@@ -175,6 +175,19 @@ Security disclosures: see [SECURITY.md](./SECURITY.md).
 - Receipt IDs with tamper-evident Merkle proof
 - Real-time policy negotiation (Phase 3)
 
+The roadmap is shaped by what users actually need — see
+[Issues](https://github.com/maango-io/maango-mcp/issues) for the live list.
+
+## Contributing
+
+If you find this useful:
+
+- ⭐ Star the repo — that's how more agents find it.
+- 🐛 [Open an issue](https://github.com/maango-io/maango-mcp/issues/new) for bugs, missing domains, or anything in a tool's output that surprised you. Include the `req_id` from the JSON log line if you have it.
+- 💡 Have a use case the current 7 tools don't cover? File an issue with a *real* example — that beats abstract feature requests every time.
+- 🛠 PRs welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) for the dev workflow and PR checklist.
+- 🔒 Security disclosures: [SECURITY.md](./SECURITY.md). Email instead of opening an issue.
+
 ## Links
 
 - Main site: https://maango.io
