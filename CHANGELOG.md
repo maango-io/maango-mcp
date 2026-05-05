@@ -20,6 +20,9 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Dependabot config for `pip`, `docker`, and `github-actions` ecosystems.
 - Release workflow: tag-driven (`v*`), runs tests, builds + pushes the
   Docker image to GHCR, creates a GitHub Release with auto-generated notes.
+- PyPI publish workflow: tag-driven (`v*`), builds sdist + wheel, uploads
+  via Trusted Publisher (OIDC). One-time PyPI configuration documented in
+  the workflow header.
 
 ### Changed
 

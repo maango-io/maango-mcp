@@ -1,0 +1,62 @@
+name: Publish to PyPI
+
+# Tag-driven PyPI publish via Trusted Publisher (OIDC) — no API token needed.
+#
+# ONE-TIME SETUP (required before this workflow can succeed):
+#   1. Create / log in at https://pypi.org/manage/account/publishing/
+#   2. Add a "pending" trusted publisher with these exact values:
+#        PyPI Project Name:    maango-mcp
+#        Owner:                7mehul
+#        Repository name:      maango-mcp
+#        Workflow name:        publish-pypi.yml
+#        Environment name:     pypi
+#   3. In this repo: Settings → Environments → New environment → "pypi"
+#      (no secrets needed, but consider adding a required reviewer for prod safety).
+#   4. Tag and push: `git tag v0.1.0 && git push origin v0.1.0`.
+#
+# After the first successful publish, PyPI converts the pending publisher
+# into a permanent one tied to the now-existing project.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Build sdist + wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/maango-mcp
+    permissions:
+      id-token: write   # required for trusted-publisher OIDC
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish via Trusted Publisher
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,11 +1,24 @@
 # Maango MCP Server
 
-The permissions layer for AI agents on the web. Before your agent scrapes, summarises, trains on, or otherwise uses content from a website, ask Maango what's allowed. One call, canonical answer.
+[![CI](https://github.com/7mehul/maango-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/7mehul/maango-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Docker (GHCR)](https://img.shields.io/badge/docker-ghcr.io%2F7mehul%2Fmaango--mcp-2496ed)](https://github.com/7mehul/maango-mcp/pkgs/container/maango-mcp)
 
-- **Hosted endpoint:** `https://mcp.maango.io/sse`
+> **The permissions layer for AI agents on the web.** Before your agent scrapes, summarises, trains on, or otherwise uses content from a website, ask Maango what's allowed. One call, canonical answer.
+
+## Why
+
+Every site that publishes a `robots.txt`, `ai.txt`, `llms.txt`, TDM-Rep header, or AI-specific ToS clause is telling agents what they can and can't do. Today no one parses all eight standards. NYT, Reddit, and Stack Overflow are suing over training data; the EU AI Act now requires opt-out compliance. Building this gate from scratch is weeks of work per agent.
+
+Maango aggregates **1,000,000+ domains × 8 AI-policy standards** into one canonical answer. Your agent calls `check_permission(domain, action)` and gets back `allowed: true/false` + a structured reason. That's it.
+
+- **Hosted endpoint:** `https://mcp.maango.io/sse` (free, no key required)
 - **Protocol:** [Model Context Protocol](https://modelcontextprotocol.io)
 - **Registry coverage:** 1,000,000+ domains, 8 AI-policy standards aggregated
 - **Transports:** `stdio` (local), `sse` + `streamable-http` (remote)
+- **Image:** [`ghcr.io/7mehul/maango-mcp`](https://github.com/7mehul/maango-mcp/pkgs/container/maango-mcp)
+- **Package:** [`pip install maango-mcp`](https://pypi.org/project/maango-mcp/)
 
 ## Tools exposed
 

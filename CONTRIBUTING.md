@@ -85,9 +85,14 @@ git tag v0.1.1
 git push origin v0.1.1
 ```
 
-The `release.yml` workflow builds the Docker image, runs the test suite,
-publishes a GitHub Release, and pushes the image to GHCR. See
-[.github/workflows/release.yml](./.github/workflows/release.yml).
+Pushing the tag triggers two workflows in parallel:
+
+- [.github/workflows/release.yml](./.github/workflows/release.yml) — runs
+  pytest, builds the multi-stage Docker image, pushes
+  `ghcr.io/7mehul/maango-mcp:<tag>` and `:latest`, creates a GitHub Release.
+- [.github/workflows/publish-pypi.yml](./.github/workflows/publish-pypi.yml)
+  — builds sdist + wheel, publishes to PyPI via Trusted Publisher (OIDC,
+  no API token). One-time PyPI setup is documented at the top of that file.
 
 ## License
 
