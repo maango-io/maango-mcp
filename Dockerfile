@@ -1,33 +1,55 @@
-# Maango MCP Server — production container
+# Maango MCP Server — production container (multi-stage)
 #
 # Build:  docker build -t maango-mcp .
 # Run:    docker run -p 8000:8000 \
-#           -e MAANGO_API_KEY=maango_sk_xxx \
-#           -e MAANGO_MCP_TRANSPORT=sse \
+#           --env-file /etc/maango-mcp.env \
 #           maango-mcp
+#
+# Multi-stage: the builder image installs uv + project deps into a self-
+# contained venv at /opt/venv, the runtime image only copies that venv +
+# adds curl for the HEALTHCHECK. Cuts ~150MB off the runtime image.
 
-FROM python:3.12-slim
+# ----- Builder stage ----------------------------------------------------------
 
-WORKDIR /app
+FROM python:3.12-slim AS builder
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN pip install --no-cache-dir uv
+
+WORKDIR /build
+
+# Copy lock + project metadata first so the install layer caches when source changes.
+COPY pyproject.toml uv.lock README.md LICENSE ./
+COPY src ./src
+
+# Install into a self-contained venv that the runtime stage will copy whole.
+RUN uv venv /opt/venv \
+ && uv pip install --no-cache --python /opt/venv/bin/python .
+
+# ----- Runtime stage ----------------------------------------------------------
+
+FROM python:3.12-slim AS runtime
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 # curl is used by the HEALTHCHECK below.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv (fast Python package manager) once, then use it for the install.
-RUN pip install --no-cache-dir uv
-
-# Copy project files and install dependencies.
-COPY pyproject.toml ./
-COPY src ./src
-RUN uv pip install --system --no-cache .
-
 # Non-root user.
 RUN useradd --create-home --shell /bin/bash maango
+
+# Pull the prepared venv across.
+COPY --from=builder /opt/venv /opt/venv
+
 USER maango
 
-# Hosted mode defaults — override at runtime.
+# Hosted mode defaults — override at runtime via --env-file or -e.
 ENV MAANGO_MCP_TRANSPORT=sse \
     MAANGO_MCP_HOST=0.0.0.0 \
     MAANGO_MCP_PORT=8000 \

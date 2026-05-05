@@ -126,13 +126,33 @@ Environment variables:
 
 The MCP server is a thin wrapper. The real data lives in the Maango REST API. We normalise the response into MCP-friendly tool output and handle the action → use-case mapping (e.g. `"scrape"` → training policy check).
 
-## Build pipeline
+## Observability
+
+The server exposes two HTTP endpoints when running on `sse` or
+`streamable-http` transports (not `stdio` — there's no port to bind):
+
+- `GET /health` — cheap liveness probe, no upstream call. Used by
+  Docker `HEALTHCHECK`, nginx, and uptime monitors.
+- `GET /metrics` — Prometheus exposition. Tracks
+  `maango_mcp_tool_requests_total{tool,status}` and
+  `maango_mcp_tool_duration_seconds{tool}` (histogram).
+
+Logs are emitted as one JSON object per stderr line with a per-tool-call
+`req_id` that propagates through the client and decision-tree. Pipe stderr
+to your log shipper of choice (Loki / Datadog / CloudWatch).
+
+## Development
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full workflow. Quick start:
 
 ```bash
-uv run pytest              # unit tests (if any)
-ruff check src             # lint
-mypy src                   # type-check
+uv sync --extra dev
+uv run pytest -q
+uv run maango-mcp                                # stdio
+MAANGO_MCP_TRANSPORT=sse uv run maango-mcp       # SSE on :8000
 ```
+
+Security disclosures: see [SECURITY.md](./SECURITY.md).
 
 ## Roadmap (not in v0.1)
 
@@ -147,8 +167,9 @@ mypy src                   # type-check
 - Main site: https://maango.io
 - API docs: https://maango.io/docs
 - Spec: https://github.com/maango-io/agent-permissions
-- Issues: https://github.com/21nkant/maango-mcp/issues
+- Issues: https://github.com/7mehul/maango-mcp/issues
+- Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ## License
 
-MIT
+MIT — see [LICENSE](./LICENSE).

@@ -8,21 +8,148 @@ Transports:
 Hosted mode listen address:
   MAANGO_MCP_HOST=0.0.0.0
   MAANGO_MCP_PORT=8000
+
+Observability:
+  - Logs are emitted as JSON on stderr with a per-tool-call req_id.
+  - /health  — cheap liveness probe (no upstream call).
+  - /metrics — Prometheus exposition (tool requests, durations, upstream errors).
 """
 
+import contextvars
 import json
 import logging
 import os
 import sys
+import time
+import uuid
+from functools import wraps
 
 from mcp.server.fastmcp import FastMCP
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    Counter,
+    Histogram,
+    generate_latest,
+)
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 
 from .client import MaangoClient
 
-logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+__version__ = "0.1.0"
+
+
+# --- Structured logging --------------------------------------------------------
+#
+# One JSON object per stderr line. Compatible with log shippers (Loki, Datadog,
+# CloudWatch). Per-call req_id is propagated via a contextvar so any logging
+# inside the tool / client / decision tree is automatically tagged.
+
+REQUEST_ID: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "maango_mcp_request_id", default="-"
+)
+
+
+class _JsonFormatter(logging.Formatter):
+    _STD_LOGRECORD_FIELDS = frozenset(
+        {
+            "args", "asctime", "created", "exc_info", "exc_text", "filename",
+            "funcName", "levelname", "levelno", "lineno", "message", "module",
+            "msecs", "msg", "name", "pathname", "process", "processName",
+            "relativeCreated", "stack_info", "taskName", "thread", "threadName",
+        }
+    )
+
+    def format(self, record: logging.LogRecord) -> str:
+        ts = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(record.created))
+        payload = {
+            "ts": f"{ts}.{int(record.msecs):03d}Z",
+            "level": record.levelname,
+            "logger": record.name,
+            "msg": record.getMessage(),
+            "req_id": REQUEST_ID.get(),
+        }
+        for key, value in record.__dict__.items():
+            if key in self._STD_LOGRECORD_FIELDS or key.startswith("_"):
+                continue
+            payload[key] = value
+        if record.exc_info:
+            payload["exc"] = self.formatException(record.exc_info)
+        return json.dumps(payload, default=str)
+
+
+def _configure_logging() -> None:
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(_JsonFormatter())
+    root = logging.getLogger()
+    root.handlers.clear()
+    root.addHandler(handler)
+    root.setLevel(logging.INFO)
+
+
+_configure_logging()
 logger = logging.getLogger("maango_mcp")
+
+
+# --- Metrics -------------------------------------------------------------------
+#
+# Module-private registry. Avoids duplicate-registration errors when the test
+# suite reloads this module (some tests call importlib.reload to pick up env
+# changes), and keeps our metrics off the global default registry.
+
+_METRICS_REGISTRY = CollectorRegistry()
+
+_TOOL_REQUESTS = Counter(
+    "maango_mcp_tool_requests",
+    "Total MCP tool calls received by this server.",
+    ["tool", "status"],
+    registry=_METRICS_REGISTRY,
+)
+_TOOL_DURATION = Histogram(
+    "maango_mcp_tool_duration_seconds",
+    "Time taken to handle an MCP tool call (includes upstream API latency).",
+    ["tool"],
+    buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0),
+    registry=_METRICS_REGISTRY,
+)
+
+
+def _instrument(tool_name: str):
+    """Wrap an async tool function with request ID, structured log, and metrics."""
+
+    def decorator(fn):
+        @wraps(fn)
+        async def wrapper(*args, **kwargs):
+            req_id = uuid.uuid4().hex[:12]
+            tok = REQUEST_ID.set(req_id)
+            t0 = time.monotonic()
+            status = "ok"
+            try:
+                return await fn(*args, **kwargs)
+            except Exception:
+                status = "error"
+                raise
+            finally:
+                duration = time.monotonic() - t0
+                logger.info(
+                    "tool_call",
+                    extra={
+                        "tool": tool_name,
+                        "status": status,
+                        "duration_ms": round(duration * 1000, 1),
+                    },
+                )
+                _TOOL_REQUESTS.labels(tool=tool_name, status=status).inc()
+                _TOOL_DURATION.labels(tool=tool_name).observe(duration)
+                REQUEST_ID.reset(tok)
+
+        return wrapper
+
+    return decorator
+
+
+# --- FastMCP setup -------------------------------------------------------------
 
 # Host/port only matter for sse + streamable-http; FastMCP reads them from constructor.
 _host = os.environ.get("MAANGO_MCP_HOST", "0.0.0.0")
@@ -178,6 +305,7 @@ def _evaluate_compliance(policy: dict, action: str, agent_id: str) -> dict:
 
 
 @mcp.tool()
+@_instrument("check_permission")
 async def check_permission(domain: str, action: str, agent_id: str = "") -> str:
     """Check whether an AI agent is permitted to perform a specific action on a given domain.
 
@@ -210,6 +338,7 @@ async def check_permission(domain: str, action: str, agent_id: str = "") -> str:
 
 
 @mcp.tool()
+@_instrument("lookup_domain")
 async def lookup_domain(domain: str) -> str:
     """Look up a domain's AI policy summary from the Maango registry.
 
@@ -225,6 +354,7 @@ async def lookup_domain(domain: str) -> str:
 
 
 @mcp.tool()
+@_instrument("lookup_domain_full")
 async def lookup_domain_full(domain: str) -> str:
     """Get full raw policy data for a domain from the Maango registry.
 
@@ -240,6 +370,7 @@ async def lookup_domain_full(domain: str) -> str:
 
 
 @mcp.tool()
+@_instrument("lookup_domain_conflicts")
 async def lookup_domain_conflicts(domain: str) -> str:
     """Get policy conflicts for a domain from the Maango registry.
 
@@ -254,6 +385,7 @@ async def lookup_domain_conflicts(domain: str) -> str:
 
 
 @mcp.tool()
+@_instrument("search_domains")
 async def search_domains(
     query: str,
     stance: str = "",
@@ -275,6 +407,7 @@ async def search_domains(
 
 
 @mcp.tool()
+@_instrument("batch_check")
 async def batch_check(domains: list[str]) -> str:
     """Compare AI policies across multiple domains using the Maango registry.
 
@@ -289,6 +422,7 @@ async def batch_check(domains: list[str]) -> str:
 
 
 @mcp.tool()
+@_instrument("get_changelog")
 async def get_changelog(
     domain: str = "",
     change_type: str = "",
@@ -309,16 +443,26 @@ async def get_changelog(
     return json.dumps(result, indent=2)
 
 
-# --- Health check --------------------------------------------------------------
+# --- HTTP routes (sse + streamable-http only) ---------------------------------
 #
-# Public, unauthenticated liveness probe for Docker HEALTHCHECK + nginx upstream
-# checks + uptime monitors. Only reachable on the sse / streamable-http transports
-# (stdio doesn't bind a port). Intentionally cheap: no upstream API call.
+# These endpoints are not part of the MCP protocol. They are public,
+# unauthenticated, and intentionally cheap — used by Docker HEALTHCHECK,
+# nginx liveness probes, and Prometheus scrapers.
 
 
 @mcp.custom_route("/health", methods=["GET"])
 async def health(_request: Request) -> JSONResponse:
-    return JSONResponse({"status": "ok", "service": "maango-mcp", "version": "0.1.0"})
+    """Cheap liveness probe — does not call upstream."""
+    return JSONResponse({"status": "ok", "service": "maango-mcp", "version": __version__})
+
+
+@mcp.custom_route("/metrics", methods=["GET"])
+async def metrics(_request: Request) -> Response:
+    """Prometheus exposition endpoint."""
+    return Response(
+        generate_latest(_METRICS_REGISTRY),
+        media_type=CONTENT_TYPE_LATEST,
+    )
 
 
 # --- Entry point ---------------------------------------------------------------
@@ -330,13 +474,14 @@ def main() -> None:
     transport = os.environ.get("MAANGO_MCP_TRANSPORT", "stdio").strip().lower()
     if transport not in _VALID_TRANSPORTS:
         logger.warning(
-            "Unknown MAANGO_MCP_TRANSPORT=%s, falling back to stdio. "
-            "Valid values: %s",
-            transport,
-            ", ".join(_VALID_TRANSPORTS),
+            "unknown_transport_falling_back_to_stdio",
+            extra={"transport": transport, "valid": list(_VALID_TRANSPORTS)},
         )
         transport = "stdio"
-    logger.info("Starting Maango MCP server (transport=%s)", transport)
+    logger.info(
+        "starting_server",
+        extra={"transport": transport, "host": _host, "port": _port, "version": __version__},
+    )
     mcp.run(transport=transport)
 
 
