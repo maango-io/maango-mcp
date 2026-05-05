@@ -36,7 +36,8 @@ htmlcov
 # Project-local Claude state
 .claude
 
-# Deploy + docs we don't need at runtime
+# Deploy artifacts not needed at runtime.
+# (LICENSE + README.md are kept — pyproject.toml references them, so the
+# builder stage needs them to install the project. They don't end up in
+# the final runtime image because only /opt/venv is copied across.)
 deploy
-README.md
-LICENSE
