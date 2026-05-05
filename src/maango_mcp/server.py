@@ -16,6 +16,8 @@ import os
 import sys
 
 from mcp.server.fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from .client import MaangoClient
 
@@ -305,6 +307,18 @@ async def get_changelog(
     """
     result = await client.get_changelog(domain or None, change_type or None, limit, offset)
     return json.dumps(result, indent=2)
+
+
+# --- Health check --------------------------------------------------------------
+#
+# Public, unauthenticated liveness probe for Docker HEALTHCHECK + nginx upstream
+# checks + uptime monitors. Only reachable on the sse / streamable-http transports
+# (stdio doesn't bind a port). Intentionally cheap: no upstream API call.
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health(_request: Request) -> JSONResponse:
+    return JSONResponse({"status": "ok", "service": "maango-mcp", "version": "0.1.0"})
 
 
 # --- Entry point ---------------------------------------------------------------

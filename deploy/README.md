@@ -40,9 +40,12 @@ The script will:
 
 1. Pull the latest code
 2. Build the Docker image
-3. Stop any previous container, start a fresh one bound to `127.0.0.1:8000`
-4. Write the nginx config at `/etc/nginx/sites-available/mcp.maango.io`
-5. Enable the site, test config, reload nginx
+3. Write `/etc/maango-mcp.env` with `MAANGO_API_KEY` (mode `0600`, owned by root)
+4. Stop any previous container, start a fresh one bound to `127.0.0.1:8000` using `--env-file`
+5. Wait for `/health` to respond (cheap liveness probe, no upstream API call)
+6. Write the nginx rate-limit zones at `/etc/nginx/conf.d/maango-mcp-rl.conf`
+7. Write the nginx site at `/etc/nginx/sites-available/mcp.maango.io`
+8. Enable the site, test config, reload nginx
 
 Takes 2–5 minutes. Output tells you what to do next.
 
@@ -113,6 +116,10 @@ Restart Claude Desktop. Ask Claude *"Check if I can scrape nytimes.com for train
 | `INSTALL_DIR` | `/srv/maango-mcp` | Where the repo is cloned |
 | `REPO_URL` | `https://github.com/21nkant/maango-mcp.git` | Source repo |
 | `MAANGO_API_BASE_URL` | `https://api.maango.io` | Upstream REST API |
+| `ENV_FILE` | `/etc/maango-mcp.env` | Path the script writes the container's secrets to (mode `0600`) |
+| `RL_REQS_PER_SEC` | `10` | Per-IP sustained request rate (`limit_req`) |
+| `RL_BURST` | `20` | Per-IP burst allowed without delay |
+| `RL_MAX_CONNS` | `10` | Per-IP concurrent connection cap (`limit_conn`, covers long-lived SSE) |
 
 ## Operational commands
 
@@ -149,6 +156,8 @@ docker rm -f maango-mcp
 docker rmi maango-mcp:latest
 sudo rm /etc/nginx/sites-enabled/mcp.maango.io
 sudo rm /etc/nginx/sites-available/mcp.maango.io
+sudo rm /etc/nginx/conf.d/maango-mcp-rl.conf
 sudo nginx -t && sudo systemctl reload nginx
+sudo rm -f /etc/maango-mcp.env
 sudo rm -rf /srv/maango-mcp
 ```

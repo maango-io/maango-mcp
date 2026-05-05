@@ -1,0 +1,42 @@
+# Version control
+.git
+.gitignore
+.github
+
+# Local Python state
+.venv
+venv
+__pycache__
+*.py[cod]
+*.egg-info
+.eggs
+build
+dist
+
+# Tests + dev tooling
+tests
+pytest.ini
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# IDE / editor / OS
+.vscode
+.idea
+.DS_Store
+*.swp
+
+# Local secrets & env
+.env
+.env.*
+!.env.example
+
+# Project-local Claude state
+.claude
+
+# Deploy + docs we don't need at runtime
+deploy
+README.md
+LICENSE

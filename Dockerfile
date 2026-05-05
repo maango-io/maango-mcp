@@ -10,6 +10,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# curl is used by the HEALTHCHECK below.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install uv (fast Python package manager) once, then use it for the install.
 RUN pip install --no-cache-dir uv
 
@@ -29,5 +34,9 @@ ENV MAANGO_MCP_TRANSPORT=sse \
     MAANGO_API_BASE_URL=https://api.maango.io
 
 EXPOSE 8000
+
+# Liveness check — hits the unauthenticated /health endpoint on the bound port.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -fsS "http://127.0.0.1:${MAANGO_MCP_PORT}/health" || exit 1
 
 CMD ["maango-mcp"]
